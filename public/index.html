@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Studia — Aprende a tu ritmo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:       #1D9E75;
+      --teal-light: #E1F5EE;
+      --teal-mid:   #5DCAA5;
+      --teal-dark:  #085041;
+      --purple:     #7F77DD;
+      --purple-light:#EEEDFE;
+      --amber:      #EF9F27;
+      --amber-light:#FAEEDA;
+      --coral:      #D85A30;
+      --bg:         #f0faf5;
+      --card:       #ffffff;
+      --text:       #2C2C2A;
+      --muted:      #888780;
+      --border:     #c8ede0;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    /* Blobs decorativos */
+    .blob1 {
+      position: fixed; top: -60px; right: -60px;
+      width: 280px; height: 280px; border-radius: 50%;
+      background: radial-gradient(circle, #9FE1CB 0%, transparent 70%);
+      opacity: 0.35; pointer-events: none;
+    }
+    .blob2 {
+      position: fixed; bottom: -80px; left: -80px;
+      width: 320px; height: 320px; border-radius: 50%;
+      background: radial-gradient(circle, #CECBF6 0%, transparent 70%);
+      opacity: 0.3; pointer-events: none;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 28px;
+      border: 1.5px solid var(--border);
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 40px rgba(29,158,117,0.10);
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-wrap {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .logo-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal-mid), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 34px; margin: 0 auto 14px;
+      box-shadow: 0 4px 20px rgba(29,158,117,0.30);
+    }
+    .logo-name {
+      font-family: 'Fredoka One', cursive;
+      font-size: 36px;
+      color: var(--teal);
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+    .logo-tagline {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      background: var(--bg);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1; padding: 9px 8px;
+      border: none; border-radius: 10px;
+      background: transparent;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px; font-weight: 700;
+      color: var(--muted); cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--card);
+      color: var(--teal);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+    .tab-btn.active-parent {
+      background: var(--card);
+      color: var(--purple);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    }
+
+    /* PANEL */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    label {
+      display: block;
+      font-size: 12px; font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 7px;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border 0.2s, box-shadow 0.2s;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+    input[type="text"]:focus, input[type="password"]:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+      background: white;
+    }
+    input.purple:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(127,119,221,0.12);
+    }
+    input::placeholder { color: #c0bdb5; letter-spacing: 0; font-weight: 400; text-transform: none; }
+
+    .btn {
+      width: 100%; padding: 14px;
+      border: none; border-radius: 16px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px; font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .btn-teal {
+      background: var(--teal);
+      color: white;
+      box-shadow: 0 4px 16px rgba(29,158,117,0.30);
+    }
+    .btn-teal:hover { background: var(--teal-dark); transform: translateY(-1px); }
+    .btn-teal:active { transform: scale(0.98); }
+    .btn-purple {
+      background: var(--purple);
+      color: white;
+      box-shadow: 0 4px 16px rgba(127,119,221,0.30);
+    }
+    .btn-purple:hover { background: #534AB7; transform: translateY(-1px); }
+    .btn-purple:active { transform: scale(0.98); }
+
+    .error-msg {
+      background: #FCEBEB;
+      border: 1px solid #F7C1C1;
+      color: #791F1F;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    .hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 16px;
+    }
+    .hint strong { color: var(--teal); }
+
+    /* DEMO CODES */
+    .demo-section {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .demo-title {
+      font-size: 11px; font-weight: 700;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.5px; text-align: center;
+      margin-bottom: 10px;
+    }
+    .demo-codes {
+      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    }
+    .demo-code {
+      background: var(--teal-light);
+      color: var(--teal-dark);
+      border: 1px solid #9FE1CB;
+      font-size: 12px; font-weight: 800;
+      padding: 5px 12px; border-radius: 8px;
+      cursor: pointer; letter-spacing: 1px;
+      transition: all 0.15s;
+    }
+    .demo-code:hover { background: var(--teal); color: white; }
+    .demo-code.purple-demo {
+      background: var(--purple-light);
+      color: #3C3489;
+      border-color: #AFA9EC;
+    }
+    .demo-code.purple-demo:hover { background: var(--purple); color: white; }
+
+    @media (max-width: 420px) {
+      .card { padding: 28px 20px; border-radius: 20px; }
+      .logo-name { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob1"></div>
+  <div class="blob2"></div>
+
+  <div class="card">
+    <div class="logo-wrap">
+      <div class="logo-icon">🦋</div>
+      <div class="logo-name">Studia</div>
+      <div class="logo-tagline">Aprende a tu ritmo, sin presión</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-alumno" onclick="switchTab('alumno')">Soy alumno</button>
+      <button class="tab-btn" id="tab-padre" onclick="switchTab('padre')">Soy padre / docente</button>
+    </div>
+
+    <!-- ALUMNO -->
+    <div class="panel active" id="panel-alumno">
+      <div class="error-msg" id="err-alumno">Código incorrecto. Intenta de nuevo.</div>
+      <label for="code-input">Tu código personal</label>
+      <input type="text" id="code-input" placeholder="ej: MARIA-7X2" maxlength="12"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter') loginAlumno()"/>
+      <button class="btn btn-teal" onclick="loginAlumno()">Entrar a aprender →</button>
+      <div class="hint">Tu código te lo da tu papá, mamá o profe.<br>Si no lo tienes, pídelo.</div>
+    </div>
+
+    <!-- PADRE -->
+    <div class="panel" id="panel-padre">
+      <div class="error-msg" id="err-padre">PIN incorrecto. Intenta de nuevo.</div>
+      <label for="pin-input">PIN de acceso</label>
+      <input type="password" id="pin-input" class="purple" placeholder="••••••" maxlength="8"
+        onkeydown="if(event.key==='Enter') loginPadre()"/>
+      <button class="btn btn-purple" onclick="loginPadre()">Ver panel →</button>
+      <div class="hint">Puedes cambiar tu PIN en el panel.</div>
+    </div>
+
+    <!-- DEMO -->
+    <div class="demo-section">
+      <div class="demo-title" id="demo-label">Códigos de demostración</div>
+      <div class="demo-codes" id="demo-codes">
+        <span class="demo-code" onclick="fillCode('SOFIA-A1')">SOFIA-A1</span>
+        <span class="demo-code" onclick="fillCode('LUIS-B2')">LUIS-B2</span>
+        <span class="demo-code" onclick="fillCode('ANA-C3')">ANA-C3</span>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ─── DATOS DE DEMO ────────────────────────────────────────────────────────
+  const STUDENTS = {
+    'SOFIA-A1': { name: 'Sofía',   level: 'primaria',   grade: '5to grado',    pin: null },
+    'LUIS-B2':  { name: 'Luis',    level: 'secundaria', grade: '1er año',      pin: null },
+    'ANA-C3':   { name: 'Ana',     level: 'primaria',   grade: '3er grado',    pin: null },
+  };
+  const PARENT_PIN = '1234';
+
+  function switchTab(tab) {
+    document.getElementById('panel-alumno').classList.toggle('active', tab === 'alumno');
+    document.getElementById('panel-padre').classList.toggle('active', tab === 'padre');
+    document.getElementById('tab-alumno').className = 'tab-btn' + (tab === 'alumno' ? ' active' : '');
+    document.getElementById('tab-padre').className  = 'tab-btn' + (tab === 'padre'  ? ' active-parent' : '');
+    const demoLabel = document.getElementById('demo-label');
+    const demoCodes = document.getElementById('demo-codes');
+    if (tab === 'padre') {
+      demoLabel.textContent = 'PIN de demostración';
+      demoCodes.innerHTML = `<span class="demo-code purple-demo" onclick="fillPin('1234')">1234</span>`;
+    } else {
+      demoLabel.textContent = 'Códigos de demostración';
+      demoCodes.innerHTML = `
+        <span class="demo-code" onclick="fillCode('SOFIA-A1')">SOFIA-A1</span>
+        <span class="demo-code" onclick="fillCode('LUIS-B2')">LUIS-B2</span>
+        <span class="demo-code" onclick="fillCode('ANA-C3')">ANA-C3</span>
+      `;
+    }
+  }
+
+  function fillCode(c) {
+    document.getElementById('code-input').value = c;
+    document.getElementById('err-alumno').classList.remove('show');
+  }
+  function fillPin(p) {
+    document.getElementById('pin-input').value = p;
+    document.getElementById('err-padre').classList.remove('show');
+  }
+
+  function loginAlumno() {
+    const code = document.getElementById('code-input').value.trim().toUpperCase();
+    const student = STUDENTS[code];
+    if (!student) {
+      document.getElementById('err-alumno').classList.add('show');
+      return;
+    }
+    sessionStorage.setItem('studia_student', JSON.stringify({ code, ...student }));
+    window.location.href = 'app.html';
+  }
+
+  function loginPadre() {
+    const pin = document.getElementById('pin-input').value.trim();
+    if (pin !== PARENT_PIN) {
+      document.getElementById('err-padre').classList.add('show');
+      return;
+    }
+    sessionStorage.setItem('studia_parent', '1');
+    window.location.href = 'panel.html';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Studia — Panel de seguimiento</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka+One&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal:#1D9E75; --teal-light:#E1F5EE; --teal-mid:#5DCAA5; --teal-dark:#085041;
+      --purple:#7F77DD; --purple-light:#EEEDFE; --purple-dark:#26215C;
+      --amber:#EF9F27; --amber-light:#FAEEDA; --amber-dark:#633806;
+      --coral:#D85A30; --coral-light:#FAECE7;
+      --green:#639922; --green-light:#EAF3DE;
+      --bg:#f5f7fa; --card:#ffffff; --text:#2C2C2A; --muted:#888780; --border:#e4e2da;
+    }
+    html,body { min-height:100%; font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); }
+
+    /* HEADER */
+    .header {
+      background:var(--card); border-bottom:1px solid var(--border);
+      padding:14px 24px; display:flex; align-items:center; gap:12px;
+      position:sticky; top:0; z-index:10;
+      box-shadow:0 1px 8px rgba(0,0,0,0.06);
+    }
+    .logo { font-family:'Fredoka One',cursive; font-size:22px; color:var(--teal); }
+    .header-sub { font-size:13px; color:var(--muted); flex:1; }
+    .exit-btn {
+      padding:7px 16px; border-radius:10px; border:1.5px solid var(--border);
+      background:transparent; cursor:pointer; font-family:'Nunito',sans-serif;
+      font-size:13px; font-weight:700; color:var(--muted); transition:all 0.2s;
+    }
+    .exit-btn:hover { background:var(--coral-light); color:var(--coral); border-color:var(--coral); }
+
+    .container { max-width:900px; margin:0 auto; padding:24px 20px 40px; }
+
+    /* SECTION TITLES */
+    h2 { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.7px; color:var(--muted); margin:28px 0 12px; }
+    h2:first-child { margin-top:0; }
+
+    /* SUMMARY METRICS */
+    .metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:4px; }
+    .metric {
+      background:var(--card); border-radius:16px;
+      border:0.5px solid var(--border); padding:16px 14px; text-align:center;
+    }
+    .metric-val { font-family:'Fredoka One',cursive; font-size:26px; line-height:1; margin-bottom:4px; }
+    .metric-lbl { font-size:11px; color:var(--muted); }
+    .mv-teal   { color:var(--teal); }
+    .mv-purple { color:var(--purple); }
+    .mv-amber  { color:var(--amber); }
+    .mv-green  { color:var(--green); }
+
+    /* STUDENT CARDS */
+    .students { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+    .student-card {
+      background:var(--card); border-radius:18px;
+      border:0.5px solid var(--border); padding:18px 16px;
+      transition:box-shadow 0.2s; cursor:pointer;
+    }
+    .student-card:hover { box-shadow:0 4px 20px rgba(0,0,0,0.08); }
+    .sc-top { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .sc-avatar {
+      width:44px; height:44px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Fredoka One',cursive; font-size:16px; flex-shrink:0;
+    }
+    .av-teal   { background:var(--teal-light); color:var(--teal-dark); }
+    .av-purple { background:var(--purple-light); color:var(--purple-dark); }
+    .av-amber  { background:var(--amber-light); color:var(--amber-dark); }
+    .sc-name { font-size:16px; font-weight:800; }
+    .sc-level { font-size:12px; color:var(--muted); margin-top:1px; }
+    .sc-code {
+      font-size:11px; font-weight:800; letter-spacing:1px;
+      background:var(--teal-light); color:var(--teal-dark);
+      padding:2px 8px; border-radius:6px; margin-top:4px; display:inline-block;
+    }
+
+    /* MINI STATS */
+    .sc-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:12px; }
+    .sc-stat {
+      background:var(--bg); border-radius:10px; padding:8px 6px; text-align:center;
+    }
+    .sc-stat-val { font-size:16px; font-weight:800; }
+    .sc-stat-lbl { font-size:10px; color:var(--muted); margin-top:1px; }
+
+    /* PROGRESS BAR INLINE */
+    .sc-bar { margin-top:12px; }
+    .sc-bar-label { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:4px; font-weight:600; }
+    .sc-track { height:6px; background:#e8e6de; border-radius:6px; overflow:hidden; }
+    .sc-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,var(--teal-mid),var(--teal)); transition:width 0.6s ease; }
+
+    /* LAST ACTIVITY */
+    .sc-last { font-size:11px; color:var(--muted); margin-top:10px; }
+    .sc-last strong { color:var(--text); }
+
+    /* SUBJECTS PILLS */
+    .sc-subjects { display:flex; gap:5px; flex-wrap:wrap; margin-top:8px; }
+    .subj-pill {
+      font-size:10px; font-weight:700; padding:2px 8px; border-radius:8px;
+    }
+    .sp-math { background:var(--teal-light); color:var(--teal-dark); }
+    .sp-read { background:var(--purple-light); color:var(--purple-dark); }
+    .sp-sci  { background:var(--green-light); color:#173404; }
+
+    /* ADD STUDENT */
+    .add-card {
+      background:var(--card); border-radius:18px;
+      border:1.5px dashed var(--border); padding:18px 16px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:10px; min-height:160px; cursor:pointer; transition:all 0.2s;
+    }
+    .add-card:hover { border-color:var(--teal); background:var(--teal-light); }
+    .add-icon { font-size:28px; }
+    .add-label { font-size:13px; font-weight:700; color:var(--muted); }
+    .add-card:hover .add-label { color:var(--teal-dark); }
+
+    /* MODAL */
+    .modal-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.4); z-index:100;
+      align-items:center; justify-content:center; padding:20px;
+    }
+    .modal-overlay.show { display:flex; }
+    .modal {
+      background:var(--card); border-radius:24px; padding:28px;
+      width:100%; max-width:380px;
+      animation:pop 0.3s cubic-bezier(0.34,1.2,0.64,1);
+    }
+    @keyframes pop{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:none}}
+    .modal h3 { font-size:18px; font-weight:800; margin-bottom:18px; }
+    .field { margin-bottom:14px; }
+    .field label { display:block; font-size:11px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+    .field input, .field select {
+      width:100%; padding:11px 14px; border-radius:12px;
+      border:1.5px solid var(--border); font-family:'Nunito',sans-serif;
+      font-size:15px; font-weight:700; color:var(--text); background:var(--bg); outline:none;
+      transition:border 0.2s;
+    }
+    .field input:focus, .field select:focus { border-color:var(--teal); background:white; }
+    .modal-actions { display:flex; gap:8px; margin-top:20px; }
+    .btn { flex:1; padding:12px; border-radius:12px; border:none; cursor:pointer; font-family:'Nunito',sans-serif; font-size:14px; font-weight:800; transition:all 0.2s; }
+    .btn-teal { background:var(--teal); color:white; }
+    .btn-teal:hover { background:var(--teal-dark); }
+    .btn-ghost { background:var(--bg); color:var(--muted); border:1.5px solid var(--border); }
+    .btn-ghost:hover { background:var(--border); }
+
+    /* GENERATED CODE */
+    .gen-code {
+      background:var(--teal-light); border-radius:12px; padding:14px;
+      text-align:center; margin-top:14px; display:none;
+    }
+    .gen-code-lbl { font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+    .gen-code-val { font-family:'Fredoka One',cursive; font-size:26px; color:var(--teal); letter-spacing:3px; }
+    .gen-code-hint { font-size:11px; color:var(--muted); margin-top:4px; }
+
+    /* RECENT SESSIONS TABLE */
+    .sessions-wrap {
+      background:var(--card); border-radius:18px;
+      border:0.5px solid var(--border); overflow:hidden;
+    }
+    .sess-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .sess-table th { text-align:left; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); padding:10px 16px; border-bottom:1px solid var(--border); }
+    .sess-table td { padding:10px 16px; border-bottom:0.5px solid var(--border); color:var(--text); }
+    .sess-table tr:last-child td { border-bottom:none; }
+    .sess-table tr:hover td { background:var(--bg); }
+    .empty-state { text-align:center; padding:32px; color:var(--muted); font-size:14px; }
+
+    @media(max-width:600px) {
+      .metrics { grid-template-columns:repeat(2,1fr); }
+      .container { padding:16px 14px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🦋 Studia</div>
+  <div class="header-sub">Panel de seguimiento</div>
+  <button class="exit-btn" onclick="salir()">Cerrar sesión</button>
+</div>
+
+<div class="container">
+
+  <!-- METRICS -->
+  <h2>Resumen general</h2>
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-val mv-teal" id="m-students">0</div>
+      <div class="metric-lbl">Alumnos activos</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val mv-amber" id="m-stars">0</div>
+      <div class="metric-lbl">Estrellas totales</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val mv-purple" id="m-sessions">0</div>
+      <div class="metric-lbl">Sesiones esta semana</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val mv-green" id="m-streak">0</div>
+      <div class="metric-lbl">Días activos (mes)</div>
+    </div>
+  </div>
+
+  <!-- STUDENTS -->
+  <h2>Mis alumnos</h2>
+  <div class="students" id="students-grid">
+    <!-- se llena con JS -->
+    <div class="add-card" onclick="openModal()">
+      <div class="add-icon">＋</div>
+      <div class="add-label">Agregar alumno</div>
+    </div>
+  </div>
+
+  <!-- RECENT SESSIONS -->
+  <h2>Sesiones recientes</h2>
+  <div class="sessions-wrap">
+    <table class="sess-table">
+      <thead>
+        <tr>
+          <th>Alumno</th>
+          <th>Fecha</th>
+          <th>Materias</th>
+          <th>Estrellas</th>
+        </tr>
+      </thead>
+      <tbody id="sessions-tbody">
+        <tr><td colspan="4" class="empty-state">No hay sesiones registradas aún.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- MODAL AGREGAR ALUMNO -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>Agregar alumno</h3>
+    <div class="field">
+      <label>Nombre</label>
+      <input type="text" id="m-name" placeholder="ej: María" maxlength="30"/>
+    </div>
+    <div class="field">
+      <label>Nivel</label>
+      <select id="m-level">
+        <option value="primaria">Primaria</option>
+        <option value="secundaria">Secundaria</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Grado</label>
+      <select id="m-grade">
+        <option>1er grado</option><option>2do grado</option><option>3er grado</option>
+        <option>4to grado</option><option>5to grado</option><option>6to grado</option>
+        <option>1er año</option><option>2do año</option><option>3er año</option>
+        <option>4to año</option><option>5to año</option>
+      </select>
+    </div>
+    <div class="gen-code" id="gen-code-box">
+      <div class="gen-code-lbl">Código del alumno</div>
+      <div class="gen-code-val" id="gen-code-val">—</div>
+      <div class="gen-code-hint">Comparte este código con tu alumno para que pueda entrar</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-teal" id="modal-btn" onclick="saveStudent()">Crear alumno</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── AUTH ─────────────────────────────────────────────────────────────────
+  if (!sessionStorage.getItem('studia_parent')) { window.location.href='index.html'; }
+
+  function salir() {
+    sessionStorage.removeItem('studia_parent');
+    window.location.href='index.html';
+  }
+
+  // ─── STUDENTS DATA ────────────────────────────────────────────────────────
+  const AVATAR_COLORS = ['av-teal','av-purple','av-amber'];
+  const SUBJ_NAMES = { math:'Matemáticas', read:'Lectura', sci:'Ciencias' };
+
+  function getStudents() {
+    return JSON.parse(localStorage.getItem('studia_students')||'[]');
+  }
+  function saveStudents(arr) {
+    localStorage.setItem('studia_students', JSON.stringify(arr));
+  }
+
+  function getProgress(code) {
+    return JSON.parse(localStorage.getItem('studia_progress_'+code)||'{}');
+  }
+
+  function generateCode(name) {
+    const base = name.toUpperCase().replace(/[^A-Z]/g,'').substring(0,5);
+    const suffix = Math.random().toString(36).substring(2,5).toUpperCase();
+    return base + '-' + suffix;
+  }
+
+  // ─── RENDER ───────────────────────────────────────────────────────────────
+  function render() {
+    const students = getStudents();
+    const grid = document.getElementById('students-grid');
+
+    // Update metrics
+    let totalStars=0, totalSessions=0, activeDays=new Set();
+    const now = new Date();
+    const weekAgo = new Date(now - 7*24*60*60*1000);
+
+    students.forEach(s => {
+      const prog = getProgress(s.code);
+      if (prog.totalStars) totalStars += prog.totalStars;
+      if (prog.sessions) {
+        prog.sessions.forEach(sess => {
+          if (new Date(sess.date) >= weekAgo) totalSessions++;
+          const month = sess.date.substring(0,7);
+          if (month === now.toISOString().substring(0,7)) activeDays.add(sess.date);
+        });
+      }
+    });
+
+    document.getElementById('m-students').textContent  = students.length;
+    document.getElementById('m-stars').textContent     = totalStars;
+    document.getElementById('m-sessions').textContent  = totalSessions;
+    document.getElementById('m-streak').textContent    = activeDays.size;
+
+    // Render student cards (keep add button)
+    const cards = students.map((s, i) => {
+      const prog    = getProgress(s.code);
+      const stars   = prog.totalStars || 0;
+      const sessions= (prog.sessions||[]).length;
+      const lastSeen= prog.lastSeen || null;
+      const allSubjs= new Set();
+      (prog.sessions||[]).forEach(sess => (sess.subjects||[]).forEach(sub => allSubjs.add(sub)));
+      const subjPills = [...allSubjs].map(sub =>
+        `<span class="subj-pill sp-${sub==='math'?'math':sub==='read'?'read':'sci'}">${SUBJ_NAMES[sub]||sub}</span>`
+      ).join('');
+
+      const avColor = AVATAR_COLORS[i % AVATAR_COLORS.length];
+      const initials = s.name.substring(0,2).toUpperCase();
+      const maxStars = 50;
+      const fillPct  = Math.min(Math.round((stars/maxStars)*100), 100);
+
+      return `
+        <div class="student-card">
+          <div class="sc-top">
+            <div class="sc-avatar ${avColor}">${initials}</div>
+            <div>
+              <div class="sc-name">${s.name}</div>
+              <div class="sc-level">${s.grade} · ${s.level}</div>
+              <div class="sc-code">${s.code}</div>
+            </div>
+          </div>
+          <div class="sc-stats">
+            <div class="sc-stat">
+              <div class="sc-stat-val" style="color:var(--amber)">⭐ ${stars}</div>
+              <div class="sc-stat-lbl">Estrellas</div>
+            </div>
+            <div class="sc-stat">
+              <div class="sc-stat-val" style="color:var(--teal)">${sessions}</div>
+              <div class="sc-stat-lbl">Sesiones</div>
+            </div>
+            <div class="sc-stat">
+              <div class="sc-stat-val" style="color:var(--purple)">${allSubjs.size}</div>
+              <div class="sc-stat-lbl">Materias</div>
+            </div>
+          </div>
+          <div class="sc-bar">
+            <div class="sc-bar-label"><span>Progreso</span><span>${fillPct}%</span></div>
+            <div class="sc-track"><div class="sc-fill" style="width:${fillPct}%"></div></div>
+          </div>
+          ${allSubjs.size > 0 ? `<div class="sc-subjects">${subjPills}</div>` : ''}
+          <div class="sc-last">${lastSeen ? `Última sesión: <strong>${formatDate(lastSeen)}</strong>` : 'Sin sesiones aún'}</div>
+        </div>
+      `;
+    }).join('');
+
+    grid.innerHTML = cards + `
+      <div class="add-card" onclick="openModal()">
+        <div class="add-icon">＋</div>
+        <div class="add-label">Agregar alumno</div>
+      </div>
+    `;
+
+    renderSessions(students);
+  }
+
+  function renderSessions(students) {
+    const tbody = document.getElementById('sessions-tbody');
+    const rows = [];
+    students.forEach(s => {
+      const prog = getProgress(s.code);
+      (prog.sessions||[]).forEach(sess => {
+        rows.push({ name:s.name, date:sess.date, subjects:sess.subjects||[], stars:sess.stars||0 });
+      });
+    });
+    rows.sort((a,b) => b.date.localeCompare(a.date));
+    const top = rows.slice(0,10);
+    if (top.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No hay sesiones registradas aún. Tu alumno debe practicar primero.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = top.map(r => `
+      <tr>
+        <td><strong>${r.name}</strong></td>
+        <td>${formatDate(r.date)}</td>
+        <td>${r.subjects.map(s=>`<span class="subj-pill sp-${s==='math'?'math':s==='read'?'read':'sci'}" style="margin-right:4px">${SUBJ_NAMES[s]||s}</span>`).join('')||'—'}</td>
+        <td>⭐ ${r.stars}</td>
+      </tr>
+    `).join('');
+  }
+
+  function formatDate(d) {
+    const [y,m,day] = d.split('-');
+    const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+  }
+
+  // ─── MODAL ────────────────────────────────────────────────────────────────
+  let createdCode = null;
+
+  function openModal() {
+    document.getElementById('modal').classList.add('show');
+    document.getElementById('m-name').value='';
+    document.getElementById('gen-code-box').style.display='none';
+    document.getElementById('modal-btn').textContent='Crear alumno';
+    createdCode = null;
+  }
+  function closeModal() {
+    document.getElementById('modal').classList.remove('show');
+    if (createdCode) render();
+  }
+
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal')) closeModal();
+  });
+
+  function saveStudent() {
+    if (createdCode) { closeModal(); return; }
+    const name  = document.getElementById('m-name').value.trim();
+    const level = document.getElementById('m-level').value;
+    const grade = document.getElementById('m-grade').value;
+    if (!name) { document.getElementById('m-name').focus(); return; }
+
+    const code = generateCode(name);
+    const students = getStudents();
+    students.push({ name, level, grade, code });
+    saveStudents(students);
+    createdCode = code;
+
+    // Also register in the "known students" for login
+    const known = JSON.parse(localStorage.getItem('studia_known_students')||'{}');
+    known[code] = { name, level, grade };
+    localStorage.setItem('studia_known_students', JSON.stringify(known));
+
+    document.getElementById('gen-code-val').textContent = code;
+    document.getElementById('gen-code-box').style.display='block';
+    document.getElementById('modal-btn').textContent='Listo ✓';
+  }
+
+  // ─── DEMO DATA ────────────────────────────────────────────────────────────
+  function loadDemoData() {
+    if (getStudents().length > 0) return;
+    const demo = [
+      { name:'Sofía',  level:'primaria',   grade:'5to grado', code:'SOFIA-A1' },
+      { name:'Luis',   level:'secundaria', grade:'1er año',   code:'LUIS-B2'  },
+      { name:'Ana',    level:'primaria',   grade:'3er grado', code:'ANA-C3'   },
+    ];
+    saveStudents(demo);
+    const known = {};
+    demo.forEach(d => known[d.code] = { name:d.name, level:d.level, grade:d.grade });
+    localStorage.setItem('studia_known_students', JSON.stringify(known));
+
+    // Simulate some sessions for demo
+    const today = new Date();
+    const fmt = d => d.toISOString().split('T')[0];
+    const d1 = fmt(today);
+    const d2 = fmt(new Date(today-1*86400000));
+    const d3 = fmt(new Date(today-2*86400000));
+
+    const sessions_sofia = { totalStars:24, lastSeen:d1, name:'Sofía', level:'primaria',
+      sessions:[{date:d1,stars:8,subjects:['math','read']},{date:d2,stars:6,subjects:['math']},{date:d3,stars:10,subjects:['sci','read']}] };
+    const sessions_luis  = { totalStars:15, lastSeen:d2, name:'Luis', level:'secundaria',
+      sessions:[{date:d2,stars:7,subjects:['math']},{date:d3,stars:8,subjects:['read','sci']}] };
+    const sessions_ana   = { totalStars:9, lastSeen:d3, name:'Ana', level:'primaria',
+      sessions:[{date:d3,stars:9,subjects:['math']}] };
+
+    localStorage.setItem('studia_progress_SOFIA-A1', JSON.stringify(sessions_sofia));
+    localStorage.setItem('studia_progress_LUIS-B2',  JSON.stringify(sessions_luis));
+    localStorage.setItem('studia_progress_ANA-C3',   JSON.stringify(sessions_ana));
+  }
+
+  loadDemoData();
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "studia",
+  "version": "2.0.0",
+  "description": "Studia — Plataforma de aprendizaje adaptativo con IA para primaria y secundaria",
+  "private": true,
+  "engines": { "node": ">=18" }
+}

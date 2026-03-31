@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Studia — Aprendiendo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --teal:#1D9E75; --teal-light:#E1F5EE; --teal-mid:#5DCAA5; --teal-dark:#085041;
+      --purple:#7F77DD; --purple-light:#EEEDFE; --purple-dark:#26215C;
+      --amber:#EF9F27; --amber-light:#FAEEDA; --amber-dark:#633806;
+      --coral:#D85A30; --coral-light:#FAECE7;
+      --green:#639922; --green-light:#EAF3DE;
+      --bg:#f0faf5; --card:#ffffff; --text:#2C2C2A; --muted:#888780; --border:#d0ede0;
+    }
+    html,body { height:100%; font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); }
+    body { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+
+    /* HEADER */
+    .header {
+      background:var(--card); border-bottom:1.5px solid var(--border);
+      padding:10px 16px; display:flex; align-items:center; gap:10px;
+      flex-shrink:0; box-shadow:0 2px 12px rgba(29,158,117,0.08);
+    }
+    .avatar {
+      width:42px; height:42px; border-radius:50%;
+      background:linear-gradient(135deg,var(--teal-mid),var(--teal));
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; flex-shrink:0;
+      box-shadow:0 2px 8px rgba(29,158,117,0.25);
+    }
+    .header-info { flex:1; min-width:0; }
+    .student-name { font-family:'Fredoka One',cursive; font-size:17px; color:var(--teal); }
+    .student-level { font-size:11px; color:var(--muted); }
+    .stars-pill {
+      background:var(--amber-light); color:var(--amber-dark);
+      font-size:13px; font-weight:800;
+      padding:5px 12px; border-radius:20px;
+      border:1.5px solid #FAC775;
+      display:flex; align-items:center; gap:4px; flex-shrink:0;
+    }
+    .exit-btn {
+      width:34px; height:34px; border-radius:50%; border:1.5px solid var(--border);
+      background:transparent; cursor:pointer; font-size:16px;
+      display:flex; align-items:center; justify-content:center;
+      color:var(--muted); transition:all 0.2s; flex-shrink:0;
+    }
+    .exit-btn:hover { background:var(--coral-light); color:var(--coral); border-color:var(--coral); }
+
+    /* SUBJECT TABS */
+    .tabs {
+      display:flex; gap:6px; padding:10px 14px 8px;
+      background:var(--card); border-bottom:1px solid var(--border); flex-shrink:0;
+    }
+    .tab {
+      flex:1; padding:9px 6px; border-radius:12px;
+      border:2px solid transparent; cursor:pointer;
+      font-family:'Nunito',sans-serif; font-size:12px; font-weight:800;
+      transition:all 0.2s; text-align:center; background:var(--bg); color:var(--muted);
+    }
+    .tab.a-math { background:var(--teal-light); border-color:var(--teal); color:var(--teal-dark); }
+    .tab.a-read { background:var(--purple-light); border-color:var(--purple); color:var(--purple-dark); }
+    .tab.a-sci  { background:#EAF3DE; border-color:#639922; color:#173404; }
+    .tab-icon { font-size:16px; display:block; margin-bottom:1px; }
+
+    /* PROGRESS */
+    .prog-wrap {
+      padding:8px 14px 6px; background:var(--card);
+      border-bottom:1px solid var(--border); flex-shrink:0;
+    }
+    .prog-row { display:flex; justify-content:space-between; font-size:11px; color:var(--muted); font-weight:600; margin-bottom:4px; }
+    .prog-track { height:7px; background:#e0ede8; border-radius:10px; overflow:hidden; }
+    .prog-fill {
+      height:100%; border-radius:10px;
+      background:linear-gradient(90deg,var(--teal-mid),var(--teal));
+      transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .prog-fill.r { background:linear-gradient(90deg,#AFA9EC,var(--purple)); }
+    .prog-fill.s { background:linear-gradient(90deg,#97C459,#639922); }
+
+    /* CHAT */
+    .chat { flex:1; overflow-y:auto; padding:14px 14px 8px; display:flex; flex-direction:column; gap:11px; scroll-behavior:smooth; }
+    .chat::-webkit-scrollbar { width:3px; }
+    .chat::-webkit-scrollbar-thumb { background:var(--teal-light); border-radius:3px; }
+
+    .msg { display:flex; flex-direction:column; }
+    .msg.sofia { align-items:flex-start; }
+    .msg.user  { align-items:flex-end; }
+    .sender { font-size:10px; font-weight:800; color:var(--teal); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px; }
+
+    .bubble {
+      max-width:88%; padding:11px 15px; border-radius:18px;
+      font-size:14px; line-height:1.65;
+      animation:pop 0.3s cubic-bezier(0.34,1.2,0.64,1);
+    }
+    @keyframes pop { from{opacity:0;transform:translateY(8px) scale(0.97)} to{opacity:1;transform:none} }
+    .bubble.sofia { background:var(--card); border:1.5px solid var(--border); border-bottom-left-radius:4px; }
+    .bubble.user  { background:var(--teal); color:white; border-bottom-right-radius:4px; }
+    .bubble.user.r{ background:var(--purple); }
+    .bubble.win   { background:var(--amber-light); border:2px solid #FAC775; color:var(--amber-dark); font-weight:700; border-bottom-left-radius:4px; }
+    .bubble.enc   { background:var(--purple-light); border:1.5px solid #AFA9EC; color:var(--purple-dark); border-bottom-left-radius:4px; }
+
+    /* OPTIONS */
+    .opts { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px; }
+    .opt {
+      padding:11px 8px; border-radius:13px; border:2px solid var(--border);
+      background:var(--bg); cursor:pointer;
+      font-family:'Nunito',sans-serif; font-size:14px; font-weight:700;
+      transition:all 0.18s; color:var(--text); text-align:center;
+    }
+    .opt:hover:not(:disabled) { border-color:var(--teal); background:var(--teal-light); transform:translateY(-1px); }
+    .opt.r:hover:not(:disabled) { border-color:var(--purple); background:var(--purple-light); }
+    .opt.ok  { background:var(--green-light); border-color:var(--green); color:#173404; }
+    .opt.bad { background:var(--coral-light); border-color:var(--coral); color:#4A1B0C; }
+    .opt.rok { background:var(--purple-light); border-color:var(--purple); color:var(--purple-dark); }
+    .opt:disabled { cursor:default; }
+
+    /* LEVEL BADGE */
+    .level-badge {
+      display:inline-block; font-size:11px; font-weight:800;
+      padding:2px 8px; border-radius:8px; margin-bottom:6px;
+    }
+    .lb-pri { background:var(--teal-light); color:var(--teal-dark); }
+    .lb-sec { background:var(--purple-light); color:var(--purple-dark); }
+
+    /* NEXT BTN */
+    .next {
+      display:none; margin-top:6px; padding:11px 20px; border-radius:14px;
+      border:none; cursor:pointer;
+      font-family:'Nunito',sans-serif; font-size:14px; font-weight:800;
+      background:var(--teal); color:white;
+      transition:all 0.2s; animation:pop 0.3s ease;
+    }
+    .next.show { display:inline-block; }
+    .next:hover { background:var(--teal-dark); }
+    .next.r { background:var(--purple); }
+    .next.r:hover { background:#3C3489; }
+
+    /* TYPING */
+    .typing { display:flex; gap:5px; align-items:center; padding:4px 2px; }
+    .dot { width:6px; height:6px; border-radius:50%; background:var(--teal-mid); animation:bounce 1.2s infinite; }
+    .dot:nth-child(2){animation-delay:.2s} .dot:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+
+    /* INPUT */
+    .input-area {
+      padding:8px 12px 12px; background:var(--card);
+      border-top:1.5px solid var(--border);
+      display:flex; gap:8px; align-items:flex-end; flex-shrink:0;
+    }
+    textarea {
+      flex:1; padding:10px 14px; border-radius:16px;
+      border:1.5px solid var(--border);
+      font-family:'Nunito',sans-serif; font-size:13px;
+      resize:none; min-height:40px; max-height:90px;
+      color:var(--text); background:var(--bg); outline:none;
+      transition:border 0.2s; line-height:1.5;
+    }
+    textarea:focus { border-color:var(--teal); }
+    textarea::placeholder { color:var(--muted); }
+    .send {
+      width:40px; height:40px; border-radius:50%;
+      background:var(--teal); border:none; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; color:white; transition:all 0.2s; flex-shrink:0;
+    }
+    .send:hover { background:var(--teal-dark); transform:scale(1.05); }
+
+    @media(max-width:380px){ .bubble{max-width:95%;font-size:13px;} }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="avatar">🦋</div>
+  <div class="header-info">
+    <div class="student-name" id="hdr-name">...</div>
+    <div class="student-level" id="hdr-level">...</div>
+  </div>
+  <div class="stars-pill">⭐ <span id="star-count">0</span></div>
+  <button class="exit-btn" onclick="salir()" title="Salir">✕</button>
+</div>
+
+<div class="tabs" id="tabs-wrap">
+  <button class="tab a-math" id="tab-mat" onclick="switchSubject('math')">
+    <span class="tab-icon">🔢</span>Matemáticas
+  </button>
+  <button class="tab" id="tab-lec" onclick="switchSubject('read')">
+    <span class="tab-icon">📖</span>Lectura
+  </button>
+  <button class="tab" id="tab-cie" onclick="switchSubject('sci')">
+    <span class="tab-icon">🔬</span>Ciencias
+  </button>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-row">
+    <span id="prog-text">Ejercicio 1 de 5</span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div class="chat" id="chat"></div>
+
+<div class="input-area">
+  <textarea id="user-input" placeholder="Escribe una pregunta a Sofía…" rows="1"
+    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendText();}"
+    oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px'"></textarea>
+  <button class="send" onclick="sendText()">➤</button>
+</div>
+
+<script>
+  // ─── SESSION ──────────────────────────────────────────────────────────────
+  const raw = sessionStorage.getItem('studia_student');
+  if (!raw) { window.location.href='index.html'; }
+  const student = JSON.parse(raw);
+  const isPrimaria = student.level === 'primaria';
+
+  document.getElementById('hdr-name').textContent  = student.name;
+  document.getElementById('hdr-level').textContent = student.grade + ' · ' + (isPrimaria ? 'Primaria' : 'Secundaria');
+
+  function salir() {
+    saveProgress();
+    window.location.href='index.html';
+  }
+
+  // ─── EXERCISES ───────────────────────────────────────────────────────────
+  const EXERCISES = {
+    math: {
+      primaria: [
+        {q:"¿Cuánto es 7 + 5?",          opts:["10","12","11","13"],            ans:"12",  emoji:"🍎"},
+        {q:"¿Cuánto es 20 − 8?",         opts:["14","10","12","11"],            ans:"12",  emoji:"🎈"},
+        {q:"¿Cuánto es 3 × 4?",          opts:["10","12","7","14"],             ans:"12",  emoji:"🌟"},
+        {q:"¿La mitad de 18?",           opts:["7","10","9","8"],               ans:"9",   emoji:"🍕"},
+        {q:"¿Cuánto es 15 + 9?",         opts:["22","25","24","23"],            ans:"24",  emoji:"🦋"},
+        {q:"¿Cuánto es 8 × 3?",          opts:["21","24","18","27"],            ans:"24",  emoji:"🚀"},
+        {q:"¿Cuánto es 50 − 17?",        opts:["33","23","43","37"],            ans:"33",  emoji:"🎯"},
+        {q:"¿Cuánto es 72 ÷ 9?",         opts:["7","9","8","6"],               ans:"8",   emoji:"🍦"},
+      ],
+      secundaria: [
+        {q:"¿Cuánto es 12 × 15?",        opts:["160","180","170","175"],        ans:"180", emoji:"🧮"},
+        {q:"¿Cuánto es 144 ÷ 12?",       opts:["11","12","13","14"],            ans:"12",  emoji:"📐"},
+        {q:"¿Cuánto es 25% de 80?",      opts:["15","25","20","30"],            ans:"20",  emoji:"💯"},
+        {q:"¿Cuánto es 2³?",             opts:["6","8","9","16"],               ans:"8",   emoji:"🔢"},
+        {q:"Si x + 7 = 15, ¿cuánto es x?", opts:["6","7","8","9"],             ans:"8",   emoji:"🧩"},
+        {q:"¿Cuánto es 3/4 + 1/4?",      opts:["1/2","1","3/8","4/4"],         ans:"1",   emoji:"🍰"},
+        {q:"¿Cuánto es el 30% de 200?",  opts:["50","60","40","70"],            ans:"60",  emoji:"📊"},
+        {q:"¿Cuánto es √64?",            opts:["6","7","8","9"],               ans:"8",   emoji:"🔭"},
+      ]
+    },
+    read: {
+      primaria: [
+        {q:'Lee: "El gato bebió leche y luego se durmió."\n\n¿Qué hizo el gato primero?',
+          opts:["Durmió","Bebió leche","Jugó","Comió"], ans:"Bebió leche", emoji:"🐱"},
+        {q:'Lee: "María tiene 3 lápices rojos y 2 azules."\n\n¿Cuántos lápices tiene en total?',
+          opts:["4","6","5","3"], ans:"5", emoji:"✏️"},
+        {q:'Lee: "El cielo se nubló y pronto llovió."\n\n¿Qué pasó después de que se nubló?',
+          opts:["Salió el sol","Llovió","Hizo frío","Hubo viento"], ans:"Llovió", emoji:"🌧️"},
+        {q:'Lee: "Ana corrió muy rápido y ganó la carrera. Todos la aplaudieron."\n\n¿Cómo se sentía Ana?',
+          opts:["Triste","Enojada","Feliz","Asustada"], ans:"Feliz", emoji:"🏆"},
+        {q:'Lee: "En verano las hojas eran verdes, en otoño se volvieron amarillas."\n\n¿De qué color eran en otoño?',
+          opts:["Verdes","Rojas","Amarillas","Azules"], ans:"Amarillas", emoji:"🍂"},
+      ],
+      secundaria: [
+        {q:'Lee: "A pesar del cansancio, Lucía terminó su proyecto antes del plazo."\n\n¿Qué palabra indica que hubo un obstáculo?',
+          opts:["cansancio","terminó","proyecto","plazo"], ans:"cansancio", emoji:"📚"},
+        {q:'Lee: "El explorador, después de años de búsqueda, finalmente encontró lo que buscaba."\n\n¿Qué indica la palabra "finalmente"?',
+          opts:["Que fue fácil","Que fue rápido","Que ocurrió tras mucho tiempo","Que fue accidental"], ans:"Que ocurrió tras mucho tiempo", emoji:"🗺️"},
+        {q:'Lee: "Las plantas necesitan luz, agua y minerales para sobrevivir."\n\n¿Cuántos elementos necesitan las plantas según el texto?',
+          opts:["2","3","4","5"], ans:"3", emoji:"🌱"},
+        {q:'Lee: "El río caudaloso arrastró todo a su paso."\n\n¿Qué significa "caudaloso"?',
+          opts:["Pequeño","Con mucha agua","Frío","Tranquilo"], ans:"Con mucha agua", emoji:"🌊"},
+        {q:'Lee: "Aunque llovía, los niños salieron a jugar."\n\n¿Cuál es la causa en la oración?',
+          opts:["Los niños","Salieron","Llovía","Jugar"], ans:"Llovía", emoji:"🌦️"},
+      ]
+    },
+    sci: {
+      primaria: [
+        {q:"¿Cuál de estos es un animal mamífero?",
+          opts:["Cocodrilo","Delfín","Iguana","Paloma"], ans:"Delfín", emoji:"🐬"},
+        {q:"¿Qué necesita una planta para vivir?",
+          opts:["Solo agua","Luz y agua","Solo luz","Tierra y oscuridad"], ans:"Luz y agua", emoji:"🌿"},
+        {q:"¿En qué estado está el agua cuando la hervimos?",
+          opts:["Sólido","Líquido","Gaseoso","Plasma"], ans:"Gaseoso", emoji:"♨️"},
+        {q:"¿Qué órgano bombea la sangre en nuestro cuerpo?",
+          opts:["Pulmón","Hígado","Corazón","Riñón"], ans:"Corazón", emoji:"❤️"},
+        {q:"¿Cuál es la estrella más cercana a la Tierra?",
+          opts:["Luna","Marte","El Sol","Júpiter"], ans:"El Sol", emoji:"☀️"},
+      ],
+      secundaria: [
+        {q:"¿Cuál es la fórmula del agua?",
+          opts:["CO₂","H₂O","O₂","NaCl"], ans:"H₂O", emoji:"💧"},
+        {q:"¿Qué proceso usan las plantas para producir alimento?",
+          opts:["Respiración","Fotosíntesis","Digestión","Fermentación"], ans:"Fotosíntesis", emoji:"🌱"},
+        {q:"¿Cuántos cromosomas tiene una célula humana normal?",
+          opts:["23","44","46","48"], ans:"46", emoji:"🧬"},
+        {q:"¿Qué tipo de energía tiene una pelota en movimiento?",
+          opts:["Potencial","Química","Cinética","Nuclear"], ans:"Cinética", emoji:"⚽"},
+        {q:"¿Cuál es el gas que más contiene el aire?",
+          opts:["Oxígeno","Nitrógeno","CO₂","Hidrógeno"], ans:"Nitrógeno", emoji:"🌬️"},
+      ]
+    }
+  };
+
+  // ─── STATE ────────────────────────────────────────────────────────────────
+  let subject = 'math';
+  let stars   = 0;
+  let idx     = 0;
+  let answered = false;
+
+  const PRAISES = [
+    "¡Increíble! ¡Lo lograste! 🎉",
+    "¡Muy bien! ¡Eres brillante! ⭐",
+    "¡Exacto! ¡Qué inteligente eres! 🌟",
+    "¡Perfecto! ¡Sigue así! 🏆",
+    "¡Wow, eso estuvo genial! ¡Una estrella para ti! ✨",
+    "¡Así se hace! ¡Estoy muy orgullosa! 💛",
+  ];
+  const ENC = (a) => [
+    `No pasa nada, era <strong>${a}</strong>. ¡Cada error nos enseña! 💪`,
+    `¡Casi! Era <strong>${a}</strong>. ¡Tú puedes, sigue! 🌈`,
+    `Esta estaba difícil. Es <strong>${a}</strong>. ¡El siguiente lo logras! 😊`,
+  ];
+
+  // ─── HELPERS ─────────────────────────────────────────────────────────────
+  const chat = () => document.getElementById('chat');
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+
+  function scrollBot() { const c = chat(); c.scrollTop = c.scrollHeight; }
+
+  function addBubble(html, type) {
+    const wrap = document.createElement('div');
+    wrap.className = 'msg ' + (type.startsWith('user') ? 'user' : 'sofia');
+    if (!type.startsWith('user')) {
+      wrap.innerHTML = `<div class="sender">✨ Sofía</div><div class="bubble ${type}">${html}</div>`;
+    } else {
+      wrap.innerHTML = `<div class="bubble ${type}">${html}</div>`;
+    }
+    chat().appendChild(wrap);
+    scrollBot(); return wrap;
+  }
+
+  function showTyping() {
+    const w = document.createElement('div');
+    w.className = 'msg sofia'; w.id = 'typing';
+    w.innerHTML = `<div class="sender">✨ Sofía</div><div class="bubble sofia"><div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
+    chat().appendChild(w); scrollBot();
+  }
+  function rmTyping() { const e=document.getElementById('typing'); if(e) e.remove(); }
+
+  function exList() {
+    const lvl = isPrimaria ? 'primaria' : 'secundaria';
+    return EXERCISES[subject][lvl];
+  }
+
+  function updateProg() {
+    const total = exList().length;
+    const done  = Math.min(idx, total);
+    const pct   = Math.round((done/total)*100);
+    document.getElementById('prog-text').textContent = `Ejercicio ${Math.min(idx+1,total)} de ${total}`;
+    document.getElementById('prog-pct').textContent  = pct+'%';
+    const fill = document.getElementById('prog-fill');
+    fill.style.width = pct+'%';
+    fill.className = 'prog-fill' + (subject==='read' ? ' r' : subject==='sci' ? ' s' : '');
+  }
+
+  function switchSubject(s) {
+    if (s===subject && idx===0) return;
+    subject=s; idx=0; answered=false;
+    ['mat','lec','cie'].forEach(id => document.getElementById('tab-'+id).className='tab');
+    if(s==='math') document.getElementById('tab-mat').className='tab a-math';
+    if(s==='read') document.getElementById('tab-lec').className='tab a-read';
+    if(s==='sci')  document.getElementById('tab-cie').className='tab a-sci';
+    chat().innerHTML='';
+    startSession();
+  }
+
+  // ─── EXERCISE FLOW ────────────────────────────────────────────────────────
+  async function startExercise() {
+    const list = exList();
+    if (idx >= list.length) { await finishSession(); return; }
+    answered = false;
+    updateProg();
+    const ex = list[idx];
+    const isR = subject==='read';
+    const isS = subject==='sci';
+
+    showTyping(); await wait(800); rmTyping();
+
+    const lvlBadge = isPrimaria
+      ? `<span class="level-badge lb-pri">Primaria</span>`
+      : `<span class="level-badge lb-sec">Secundaria</span>`;
+
+    const optClass = isR ? 'opt r' : 'opt';
+    const nextCls  = 'next' + (isR ? ' r' : '');
+
+    const wrap = document.createElement('div');
+    wrap.className = 'msg sofia';
+    wrap.innerHTML = `
+      <div class="sender">✨ Sofía</div>
+      <div class="bubble sofia">
+        ${lvlBadge}
+        <div style="font-size:22px;margin-bottom:6px">${ex.emoji}</div>
+        <div style="white-space:pre-line">${ex.q}</div>
+        <div class="opts" id="opts">
+          ${ex.opts.map(o =>
+            `<button class="${optClass}" onclick="checkAnswer(this,'${o.replace(/'/g,"\\'")}','${ex.ans.replace(/'/g,"\\'")}','${nextCls}')">${o}</button>`
+          ).join('')}
+        </div>
+      </div>
+      <button class="${nextCls}" id="next-btn" onclick="nextEx()">Siguiente →</button>
+    `;
+    chat().appendChild(wrap); scrollBot();
+  }
+
+  async function checkAnswer(btn, chosen, correct, nextCls) {
+    if (answered) return;
+    answered = true;
+    document.getElementById('opts').querySelectorAll('button').forEach(b => { b.disabled=true; b.onclick=null; });
+
+    if (chosen === correct) {
+      btn.classList.add('ok');
+      stars++;
+      document.getElementById('star-count').textContent = stars;
+      saveProgress();
+      showTyping(); await wait(600); rmTyping();
+      addBubble(rand(PRAISES), 'win');
+    } else {
+      btn.classList.add('bad');
+      const cb = Array.from(document.getElementById('opts').querySelectorAll('button')).find(b=>b.textContent.trim()===correct);
+      if(cb) cb.classList.add(subject==='read'?'rok':'ok');
+      showTyping(); await wait(600); rmTyping();
+      addBubble(rand(ENC(correct)), 'enc');
+    }
+    const nb = document.getElementById('next-btn');
+    if(nb) nb.classList.add('show');
+    scrollBot();
+  }
+
+  function nextEx() { idx++; startExercise(); }
+
+  async function finishSession() {
+    showTyping(); await wait(900); rmTyping();
+    const subNames = {math:'Matemáticas', read:'Lectura', sci:'Ciencias'};
+    addBubble(
+      `¡Terminaste todos los ejercicios de <strong>${subNames[subject]}</strong>! 🎊<br><br>` +
+      `Hoy juntaste <strong>${stars} estrella${stars!==1?'s':''}</strong>. ` +
+      `¡Eso es un logro enorme! Estoy muy orgullosa de ti. 💛`,
+      'win'
+    );
+    await wait(400);
+    const wrap = document.createElement('div');
+    wrap.className = 'msg sofia';
+    wrap.innerHTML = `<button class="next show" style="margin-top:4px" onclick="restartSession()">¡Practicar de nuevo! 🔁</button>`;
+    chat().appendChild(wrap); scrollBot();
+  }
+
+  function restartSession() { idx=0; answered=false; chat().innerHTML=''; startSession(); }
+
+  // ─── FREE TEXT → API ──────────────────────────────────────────────────────
+  async function sendText() {
+    const inp = document.getElementById('user-input');
+    const val = inp.value.trim(); if(!val) return;
+    inp.value=''; inp.style.height='auto';
+    addBubble(val, subject==='read'?'user r':'user');
+    showTyping();
+    try {
+      const r = await fetch('/api/chat', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          message: val,
+          studentName: student.name,
+          level: student.level,
+          subject
+        })
+      });
+      const data = await r.json();
+      rmTyping();
+      addBubble(data.reply||'¡Aquí estoy para ayudarte! 😊','sofia');
+    } catch(e) {
+      rmTyping();
+      addBubble('¡Ups! Algo salió mal. Intenta de nuevo. 😊','sofia');
+    }
+  }
+
+  // ─── PROGRESS STORAGE ────────────────────────────────────────────────────
+  function saveProgress() {
+    const key = 'studia_progress_' + student.code;
+    const prev = JSON.parse(localStorage.getItem(key)||'{}');
+    const today = new Date().toISOString().split('T')[0];
+    if (!prev.sessions) prev.sessions = [];
+    if (!prev.totalStars) prev.totalStars = 0;
+    prev.totalStars = (prev.totalStars||0) + 1;
+    const todaySession = prev.sessions.find(s => s.date === today);
+    if (todaySession) {
+      todaySession.stars = stars;
+      todaySession.subjects = todaySession.subjects || [];
+      if (!todaySession.subjects.includes(subject)) todaySession.subjects.push(subject);
+    } else {
+      prev.sessions.push({ date: today, stars, subjects: [subject] });
+    }
+    prev.lastSeen = today;
+    prev.name = student.name;
+    prev.level = student.level;
+    prev.grade = student.grade;
+    localStorage.setItem(key, JSON.stringify(prev));
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────────────────────
+  async function startSession() {
+    updateProg();
+    showTyping(); await wait(700); rmTyping();
+    const subNames = {math:'Matemáticas', read:'Lectura', sci:'Ciencias'};
+    const emojis   = {math:'🔢', read:'📖', sci:'🔬'};
+    const lvlTxt   = isPrimaria ? 'primaria' : 'secundaria';
+    addBubble(
+      `¡Hola, <strong>${student.name}</strong>! Soy Sofía ${emojis[subject]}<br><br>` +
+      `Hoy practicamos <strong>${subNames[subject]}</strong> nivel ${lvlTxt}. ` +
+      `¡A tu ritmo, sin prisa! Si te equivocas, no pasa nada — yo siempre estoy aquí. 😊`,
+      'sofia'
+    );
+    await wait(300);
+    startExercise();
+  }
+
+  startSession();
+</script>
+</body>
+</html>
